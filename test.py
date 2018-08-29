@@ -14,8 +14,9 @@ if __name__ == "__main__":
 
     gym.logger.set_level(40)
     env = gym.make('Qube-v0')
-    n = 400;
+    n = 1000;
     x = np.zeros([n,4])
+    x[1] = np.pi
     for i_episode in range(1,2):
         observation = env.reset()
         x[0] =  observation
@@ -24,7 +25,7 @@ if __name__ == "__main__":
             print(observation)
             action = 1;
             observation, reward, done, info = env.step(action)
-            x[t] =  observation
+            x[t] =  observation * 180.0/np.pi
             if done==1:
                 print("Episode finished after {} timesteps".format(t+1))
                 break

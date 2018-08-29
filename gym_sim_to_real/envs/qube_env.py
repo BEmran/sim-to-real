@@ -87,8 +87,8 @@ class QubeEnv(gym.Env):
 
         ns = self.rk4(torque)
 
-        #ns[0] = self.wrap (ns[0], -pi, pi)
-        #ns[1] = self.wrap (ns[1], -pi, pi)
+        ns[0] = self.wrap (ns[0], -np.pi,   np.pi)
+        ns[1] = self.wrap (ns[1], 0     , 2*np.pi)
         ns[2] = self.bound(ns[2], -self.MAX_VEL_1, self.MAX_VEL_1)
         ns[3] = self.bound(ns[3], -self.MAX_VEL_2, self.MAX_VEL_2)
 
@@ -103,8 +103,12 @@ class QubeEnv(gym.Env):
 
     def _terminal(self):
         s = self.state
-        return bool( s[0] > 2*np.pi/3 or s[0] < -2*np.pi/3 or
-                     s[1] < np.pi/2 or s[1] > 3*np.pi/2)
+        result = bool(s[0] <-2*np.pi/3 or s[0] > 2*np.pi/3 or
+                      s[1] <   np.pi/2 or s[1] > 3*np.pi/2)
+        if result:
+            print ('Terminate: arm angle s[0]=',s[0],'pend. angle s[1]=',s[1])
+        return result
+    
 
     def _dsdt(self, s, T, t):
 
@@ -161,7 +165,7 @@ class QubeEnv(gym.Env):
         # define center points and angles
         arm_xy = np.array([ 4.0, 0.0])
         pen_xy = np.array([-4.0, 0.0])
-        thetas = [s[0]+np.pi, s[1]+np.pi]
+        thetas = [s[0]+ np.pi, s[1]+ np.pi] 
 
         # define colors
         rgb_dred = [0.5, 0,0]
