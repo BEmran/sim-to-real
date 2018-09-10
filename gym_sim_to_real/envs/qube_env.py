@@ -94,7 +94,7 @@ class QubeEnv(gym.Env):
 
         self.state = ns
         terminal = self._terminal()
-        reward = 1.0 if not terminal else 0.0
+        reward = self._reward() if not terminal else -1.0
         return (self._get_ob(), reward, terminal, {})
 
     def _get_ob(self):
@@ -103,12 +103,17 @@ class QubeEnv(gym.Env):
 
     def _terminal(self):
         s = self.state
-        result = bool(s[0] <-2*np.pi/3 or s[0] > 2*np.pi/3 or
-                      s[1] <   np.pi/2 or s[1] > 3*np.pi/2)
-        if result:
-            print ('Terminate: arm angle s[0]=',s[0],'pend. angle s[1]=',s[1])
-        return result
-    
+        result_arm = bool(s[0] <-2*np.pi/3 or s[0] > 2*np.pi/3)
+        result_pend = bool(s[1] <  np.pi/2 or s[1] > 3*np.pi/2)
+        if result_arm:
+            print ('Arm', s[0])
+        if result_pend:
+            print ('Pendulum', s[1])
+        return result_pend or result_arm
+
+    def _reward(self):
+        s = self.state
+        return 0.3*np.exp(-0.5*((s[0]/0.5)**2)) + 0.7*np.exp(-0.5*(((s[1]-np.pi)/0.5)**2))
 
     def _dsdt(self, s, T, t):
 
