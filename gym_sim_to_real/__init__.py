@@ -22,4 +22,13 @@ if not 'Qube-v0' in env_ids:
         reward_threshold = 1.0,
         nondeterministic = True,
     )
+    
+    register(
+        id = 'QubeMotorAngle-v0',
+        entry_point = 'gym_sim_to_real.envs:QubeMotorAngleEnv',
+        timestep_limit = 1000,
+        reward_threshold = 1.0,
+        nondeterministic = True,
+    )
+
 

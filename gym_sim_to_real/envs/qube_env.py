@@ -58,7 +58,7 @@ class QubeEnv(gym.Env):
     MAX_VEL_1 = 10.0 * np.pi
     MAX_VEL_2 = 10.0 * np.pi
 
-    AVAIL_TORQUE = [-1.0, 0.0, +1.0]
+    AVAIL_TORQUE = [0.0, +1.0, -1.0]
 
     action_arrow = None
     domain_fig = None
@@ -72,6 +72,8 @@ class QubeEnv(gym.Env):
         self.action_space = spaces.Discrete(3)
         self.state = None
         self.seed()
+	self.u0 = 0
+	self.v0 = 0
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
@@ -84,7 +86,7 @@ class QubeEnv(gym.Env):
 
     def step(self, a):
         torque = self.AVAIL_TORQUE[a]
-
+	torque = self._poly(torque)
         ns = self.rk4(torque)
 
         ns[0] = self.wrap (ns[0], -np.pi,   np.pi)
@@ -113,7 +115,13 @@ class QubeEnv(gym.Env):
 
     def _reward(self):
         s = self.state
-        return 0.3*np.exp(-0.5*((s[0]/0.5)**2)) + 0.7*np.exp(-0.5*(((s[1]-np.pi)/0.5)**2))
+        return 0.2*np.exp(-0.5*((s[0]/0.5)**2)) + 0.8*np.exp(-0.5*(((s[1]-np.pi)/0.5)**2))
+
+    def _poly(self, u):
+	v = v0 + u - 0.9998*u0
+	self.v0 = v
+	self.u0 = u
+        return v 
 
     def _dsdt(self, s, T, t):
 
