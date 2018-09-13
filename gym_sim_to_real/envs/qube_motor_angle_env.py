@@ -51,6 +51,8 @@ class QubeMotorAngleEnv(gym.Env):
         return [seed]
 
     def reset(self):
+        self.u0 = 0
+        self.v0 = 0
         high = np.array([np.pi/12, 1])
         self.state = self.np_random.uniform(low=-high, high=high)
         return self._get_ob()

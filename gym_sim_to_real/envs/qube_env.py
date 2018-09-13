@@ -80,6 +80,8 @@ class QubeEnv(gym.Env):
         return [seed]
 
     def reset(self):
+        self.u0 = 0
+        self.v0 = 0
         s0, s1 = self.np_random.uniform(low=-0.1, high=0.1, size=(2,))
         s2, s3 = self.np_random.uniform(low=-0.01, high=0.01, size=(2,))
         self.state = [s0, s1, s2, s3]
