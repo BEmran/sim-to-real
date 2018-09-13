@@ -4,6 +4,7 @@
 Created on Mon Aug  6 23:20:31 2018
 
 @author: kashishg
+disc
 """
 import gym_sim_to_real
 import gym
@@ -95,7 +96,7 @@ def select_action(state):
         random_action = torch.tensor([[random.randrange(3)]], device=device, dtype=torch.long)
         return random_action, last_hidden
 
-mean_dur = 100
+mean_dur = 5
 
 def plot_durations():
     plt.figure(2)
@@ -187,12 +188,12 @@ EPS_END = 0.1
 EPS_DECAY = 200
 
 TARGET_UPDATE = 10
-num_episodes = 200
-hidden_size = 50
+num_episodes = 25
+hidden_size = 10
 last_hidden = torch.zeros(1, hidden_size, device = device, dtype = dtype)
 
-policy_net = ClassFile.RNN().to(device)
-target_net = ClassFile.RNN().to(device)
+policy_net = ClassFile.RNN_disc().to(device)
+target_net = ClassFile.RNN_disc().to(device)
 target_net.load_state_dict(policy_net.state_dict())
 target_net.eval()
 
@@ -203,8 +204,7 @@ memory = ReplayMemory(10000)
 steps_done = 0
 
     
-gym.logger.set_level(40)
-env = gym.make('Qube-v0')
+env = gym.make('QubeMotorAngle-v0')
 
 env.reset()
 

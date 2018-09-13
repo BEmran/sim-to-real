@@ -72,21 +72,23 @@ class QubeEnv(gym.Env):
         self.action_space = spaces.Discrete(3)
         self.state = None
         self.seed()
-	self.u0 = 0
-	self.v0 = 0
+        self.u0 = 0
+        self.v0 = 0
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
 
     def reset(self):
-        self.state = self.np_random.uniform(low=-0.1, high=0.1, size=(4,))
+        s0, s1 = self.np_random.uniform(low=-0.1, high=0.1, size=(2,))
+        s2, s3 = self.np_random.uniform(low=-0.01, high=0.01, size=(2,))
+        self.state = [s0, s1, s2, s3]
         self.state[1] += np.pi
         return self._get_ob()
-
     def step(self, a):
         torque = self.AVAIL_TORQUE[a]
-	torque = self._poly(torque)
+        torque = self._poly(torque)
+        #print(torque)
         ns = self.rk4(torque)
 
         ns[0] = self.wrap (ns[0], -np.pi,   np.pi)
@@ -96,7 +98,7 @@ class QubeEnv(gym.Env):
 
         self.state = ns
         terminal = self._terminal()
-        reward = self._reward() if not terminal else -1.0
+        reward = self._reward() if not terminal else 0.0
         return (self._get_ob(), reward, terminal, {})
 
     def _get_ob(self):
@@ -106,21 +108,22 @@ class QubeEnv(gym.Env):
     def _terminal(self):
         s = self.state
         result_arm = bool(s[0] <-2*np.pi/3 or s[0] > 2*np.pi/3)
-        result_pend = bool(s[1] <  np.pi/2 or s[1] > 3*np.pi/2)
-        if result_arm:
-            print ('Arm', s[0])
-        if result_pend:
-            print ('Pendulum', s[1])
+        #result_pend = bool(s[1] <  np.pi/2 or s[1] > 3*np.pi/2)
+        result_pend = bool(s[1] <  (np.pi-np.pi/12) or s[1] > (np.pi+np.pi/12))
+        #if result_arm:
+        #    print ('Arm', s[0])
+        #if result_pend:
+        #    print ('Pendulum', s[1])
         return result_pend or result_arm
 
     def _reward(self):
         s = self.state
-        return 0.2*np.exp(-0.5*((s[0]/0.5)**2)) + 0.8*np.exp(-0.5*(((s[1]-np.pi)/0.5)**2))
+        return 0.2*np.exp(-0.5*((s[0]/0.1)**2)) + 0.8*np.exp(-0.5*(((s[1]-np.pi)/0.1)**2))
 
     def _poly(self, u):
-	v = v0 + u - 0.9998*u0
-	self.v0 = v
-	self.u0 = u
+        v = self.v0 + u - 0.9998*self.u0
+        self.v0 = v
+        self.u0 = u
         return v 
 
     def _dsdt(self, s, T, t):

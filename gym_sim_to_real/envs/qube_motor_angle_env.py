@@ -29,7 +29,7 @@ class QubeMotorAngleEnv(gym.Env):
     TF_NUMERATOR = 220
     TF_DENOMINATOR = 9.15
  
-    MAX_ANG = 4 * np.pi
+    MAX_ANG = np.pi/12
     MAX_VEL = 100.0
     MAX_VOL = 1
 
@@ -43,7 +43,7 @@ class QubeMotorAngleEnv(gym.Env):
         self.observation_space = spaces.Box(low=-high, high=high)
         self.state = None
         self.seed()
-	self.v0 = 0
+        self.v0 = 0
         self.u0 = 0
 
     def seed(self, seed=None):
@@ -51,14 +51,14 @@ class QubeMotorAngleEnv(gym.Env):
         return [seed]
 
     def reset(self):
-        high = np.array([np.pi, 1])
+        high = np.array([np.pi/12, 1])
         self.state = self.np_random.uniform(low=-high, high=high)
         return self._get_ob()
     
     def step(self, a):
         
         u = self.AVAIL_TORQUE[a]
-	v = self._poly(u)
+        v = self._poly(u)
         self.state = self.rk4(v)
         terminal = self._terminal()
         reward = self._reward();
@@ -69,9 +69,9 @@ class QubeMotorAngleEnv(gym.Env):
         return np.array([s[0], s[1]])
 
     def _poly(self, u):
-	v = v0 + u - 0.9998*u0
-	self.v0 = v
-	self.u0 = u
+        v = self.v0 + u - 0.9998*self.u0
+        self.v0 = v
+        self.u0 = u
         return v 
         
     def _terminal(self):
