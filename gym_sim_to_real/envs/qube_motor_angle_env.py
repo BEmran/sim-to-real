@@ -29,7 +29,7 @@ class QubeMotorAngleEnv(gym.Env):
     TF_NUMERATOR = 220
     TF_DENOMINATOR = 9.15
  
-    MAX_ANG = np.pi/12
+    MAX_ANG = np.pi*2#np.pi/12
     MAX_VEL = 100.0
     MAX_VOL = 1
 
@@ -53,17 +53,18 @@ class QubeMotorAngleEnv(gym.Env):
     def reset(self):
         self.u0 = 0
         self.v0 = 0
-        high = np.array([np.pi/12, 1])
+        high = np.array([np.pi/12, 0.1])
         self.state = self.np_random.uniform(low=-high, high=high)
         return self._get_ob()
     
     def step(self, a):
         
-        u = self.AVAIL_TORQUE[a]
-        v = self._poly(u)
+        #v = self.AVAIL_TORQUE[a] * 0.5
+        v = self._poly(self.AVAIL_TORQUE[a] * 0.5)
+        
         self.state = self.rk4(v)
         terminal = self._terminal()
-        reward = self._reward();
+        reward = self._reward()
         return (self._get_ob(), reward, terminal, {})
 
     def _get_ob(self):
@@ -71,7 +72,10 @@ class QubeMotorAngleEnv(gym.Env):
         return np.array([s[0], s[1]])
 
     def _poly(self, u):
-        v = self.v0 + u - 0.9998*self.u0
+        if (u == 0):
+            v = 0
+        else:
+            v = self.v0 + u - 0.9998*self.u0
         self.v0 = v
         self.u0 = u
         return v 
@@ -89,9 +93,10 @@ class QubeMotorAngleEnv(gym.Env):
         d = self.TF_DENOMINATOR
 
         ang, vel = self.state
+        dang = vel
         dvel = - d * vel + n * u
         
-        return (vel, dvel,)
+        return (dang, dvel,)
 
     def rk4(self, a):
         s = self.state
@@ -106,7 +111,7 @@ class QubeMotorAngleEnv(gym.Env):
 
     def _reward(self):
         s = self.state
-        return np.exp(-1.5*((s[0]/0.5)**2))
+        return 2*np.exp(-1.5*((s[0]/1.0)**2))-1
 
     def render(self, mode='human'):
     
