@@ -6,10 +6,7 @@ Created on Wed Sep 12 19:38:24 2018
 @author: acis
 """
 
-
-
-import gym_sim_to_real
-import gym
+import environment as envo
 from time import sleep
 import numpy as np
 import matplotlib.pyplot as plt
@@ -35,9 +32,9 @@ plt.ion()
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 dtype = torch.float
 
-env = gym.make('QubeMotorAngle-v0')
+#env = envo.Environment("sim")
+env = envo.Environment("sim", "localhost", 18001)
 env.reset()
-
 
 
 total_episodes = 100
@@ -48,7 +45,7 @@ episode_durations = []
 
 #target_net.load_state_dict('target_net.pth')
 policy_net = ClassFile.RNN_disc().to(device)
-policy_net = torch.load('disc.pth')
+policy_net = torch.load('disc.pth', map_location='cpu')
 
 policy_net.eval()
 hidden_size = 10;
